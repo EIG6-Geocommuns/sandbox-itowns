@@ -31,10 +31,25 @@ function eraseSuggestionList(form: HTMLFormElement) {
     }
 }
 
+type GeocodingResult = {
+        city: string,
+        zipcode: string,
+        street: string,
+        kind: string,
+        classification: number,
+        fulltext: string,
+        country: string,
+        x: number,
+        y: number
+};
+
+type GeocodingResults = {
+    results: Array<GeocodingResult>
+};
+
 type GeocodingOptions = {
     url: URL,
-    parser: Function,
-    onSelected?: Function
+    onSelected?: (location: any) => void
 };
 
 type SearchbarOptions = {
@@ -53,6 +68,7 @@ class Searchbar {
     parentElement: HTMLElement;
     domElement: HTMLElement;
 
+    // TODO: Generic parsing and onSelected
     constructor(geocodingOptions: GeocodingOptions,
                 options: SearchbarOptions) {
         this.#_onSelected = geocodingOptions.onSelected ?? (() => {});
@@ -96,20 +112,27 @@ class Searchbar {
 
             geocodingOptions.url.searchParams.set('text', value);
 
-            itowns.Fetcher.json(geocodingOptions.url.toString()).then((geocodingResult) => {
-                const result = geocodingOptions.parser(geocodingResult);
+            itowns.Fetcher.json(geocodingOptions.url.toString()).then((geocodingResult: GeocodingResults) => {
+                // Map all {x, y} to coords
+                const result = geocodingResult.results.map((location) => {
+                    const { x, y, ...loc} = location;
+                    return {
+                        coords: new itowns.Coordinates('EPSG:4326', x, y),
+                        ...loc,
+                    };
+                });
 
                 let i = 0;
-                result.forEach((info: any, location: any) => {
+                result.forEach(location => {
                     // Stop looping through the map if enough location have been proceeded.
                     if (i === Math.min(
-                        result.size,
+                        result.length,
                         options.maxSuggestionNumber,
                     )) { return; }
                     const mapIndex = i;
                     i++;
 
-                    const index = location.toUpperCase().indexOf(value.toUpperCase());
+                    const index = location.fulltext.toUpperCase().indexOf(value.toUpperCase());
 
                     if (index > -1) {
                         const autocompleteItem = document.createElement('div');
@@ -118,13 +141,13 @@ class Searchbar {
                         autocompleteItem.style.fontSize = `${options.fontSize}px`;
 
                         // Make the matching letters bold.
-                        const start = location.slice(0, index);
-                        const bold = location.slice(index, index + value.length);
-                        const end = location.slice(index + value.length, location.length);
+                        const start = location.fulltext.slice(0, index);
+                        const bold = location.fulltext.slice(index, index + value.length);
+                        const end = location.fulltext.slice(index + value.length, location.fulltext.length);
 
                         autocompleteItem.innerHTML = `<p>${start}<strong>${bold}</strong>${end}</p>`;
                         // Store the current location value as an attribute of autocompleteItem div.
-                        autocompleteItem.setAttribute('location', location);
+                        autocompleteItem.setAttribute('location', location.fulltext);
 
                         form.appendChild(autocompleteItem);
 
@@ -135,7 +158,7 @@ class Searchbar {
                         });
 
                         autocompleteItem.addEventListener('click', () => {
-                            this.#_onSelected(info);
+                            this.#_onSelected(location);
 
                             attr = autocompleteItem.getAttribute('location');
                             if (attr) eraseSuggestionList(form);

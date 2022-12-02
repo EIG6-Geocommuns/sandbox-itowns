@@ -68,31 +68,72 @@ const SelectView = (props: {id: string}) => {
     );
 }
 
-const standardSelect = () => {
+interface Location {
+    fulltext: string,
+    coords: itowns.Coordinates,
+};
+
+type LocationSelectProps = {
+    onSelected: (loc: Location, extent: boolean) => void
+}
+
+const LocationSelect = (props: LocationSelectProps) => {
+    const [checkedAll, setCheckedAll] = useState(false);
+
+    function onSearchBarSelected(loc: Location) {
+        props.onSelected(loc, checkedAll);
+    }
+
+    // TODO: Add onSearchBarSelected listener to SearchBar when it will be
+    // implemented
     return (
-        <div hidden={false}>
+        <div id="placeselection">
             <SearchBar />
             <div>
-                <input type="checkbox" id="select-all" name="select-all" />
                 <label htmlFor="select-all">Sélectionner le lieu en entier</label>
+                <input type="checkbox"
+                       id="select-all" name="select-all"
+                       defaultChecked={checkedAll}
+                       onChange={() => setCheckedAll(!checkedAll)} />
             </div>
-            <br/>
         </div>
     )
 }
 
-// TODO: Component too big, split
+type Tool = 'Point' | 'Polygon'
+
+const ToolBar = (props: { onToolSelected:(t?: Tool) => void }) => {
+    const [currentTool, setCurrentTool] = useState<Tool>()
+
+    function setTool(tool?: Tool) {
+        setCurrentTool(tool);
+        props.onToolSelected(tool);
+    }
+
+    // TODO: SVG icons for buttons
+    // TODO: Use currentTool state to 'hover' the current selected button
+    return (
+        <div id="select-toolbar">
+            <button onClick={() => setTool('Point')}>Point</button>
+            <button onClick={() => setTool('Polygon')}>Polygone</button>
+            <button onClick={() => setTool()}>Reset</button>
+        </div>
+    )
+}
+
+// TODO: communication between itowns view and the sidebar
 const SplashScreen = () => {
+    function onToolSelected(t?: Tool) {}
+    function onLocationSelected(l: Location, isExtent: boolean) {}
+
     return (
         <>
         <SelectView id="viewerDiv" />
         <div id="sideForm">
             <input type="text" placeholder="Nom du projet" required />
             <h2>Selectionner l'emprise</h2>
-            <h3>Sélection par dalle</h3>
-
-            <div hidden={false}>
-            </div>
+            <LocationSelect onSelected={onLocationSelected} />
+            <ToolBar onToolSelected={onToolSelected} />
             <input type="submit" value="Extraire" />
         </div>
         </>

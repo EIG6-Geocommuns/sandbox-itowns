@@ -8,8 +8,7 @@ class SearchBar extends React.Component {
 
     render() {
         return (
-            <>
-            </>
+            <p>TODO: SearchBar implementation</p>
         )
     }
 }
