@@ -1,0 +1,88 @@
+import * as THREE from 'three';
+import * as itowns from 'itowns';
+
+const orthoSource = new itowns.WMTSSource({
+    url: 'http://wxs.ign.fr/3ht7xcw6f7nciopo16etuqp2/geoportail/wmts',
+    crs: 'EPSG:3857',
+    name: 'ORTHOIMAGERY.ORTHOPHOTOS',
+    tileMatrixSet: 'PM',
+    format: 'image/jpeg',
+});
+const planIGNSource = new itowns.WMTSSource({
+    url: 'http://wxs.ign.fr/decouverte/geoportail/wmts',
+    crs: 'EPSG:3857',
+    name: 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2',
+    tileMatrixSet: 'PM',
+    format: 'image/jpeg'
+});
+const mvtSource = new itowns.VectorTilesSource({
+    style: 'https://wxs.ign.fr/essentiels/static/vectorTiles/styles/PLAN.IGN/standard.json',
+    filter: (layer: any) => {
+        return !layer['source-layer'].includes('oro_') &&
+            !layer['source-layer'].includes('parcellaire')
+    }
+});
+const selectSource: any = new itowns.FileSource({
+    url: 'https://france-geojson.gregoiredavid.fr/repo/departements/13-bouches-du-rhone/departement-13-bouches-du-rhone.geojson',
+    crs: 'EPSG:3857',
+    format: 'application/json',
+});
+
+// TODO: Max zoom et min zoom
+// TODO: Borne sur les cotes
+function main() {
+
+    const extent = new itowns.Extent(
+        'EPSG:3857',
+        -20037508.342789244, 20037508.342789244,
+        -20037508.342789255, 20037508.342789244);
+
+    const viewerDiv = document.getElementById('viewerDiv') as HTMLDivElement;
+
+    // By default itowns' tiles geometry have a "skirt" (ie they have a height),
+    // but in case of orthographic we don't need this feature, so disable it.
+    const view = new itowns.PlanarView(viewerDiv, extent);
+
+    const mvtLayer = new itowns.ColorLayer('MVT', {
+        source: mvtSource,
+        addLabelLayer: true
+    });
+    //view.addLayer(mvtLayer);
+
+    const orthoLayer = new itowns.ColorLayer('ORTHO', {
+        source: orthoSource
+    });
+    view.addLayer(orthoLayer).then(function (_) {
+        itowns.ColorLayersOrdering.moveLayerToIndex(view, 'ORTHO', 0);
+    });
+
+    // Create a ColorLayer for the Ariege area
+    const selectLayer = new itowns.ColorLayer('SELECT', {
+        transparent: true,
+        source: selectSource,
+        style: new itowns.Style({
+            fill: {
+                color: 'orange',
+                opacity: 1,
+            },
+            stroke: {
+                color: 'white',
+            },
+        }),
+    });
+    view.addLayer(selectLayer);
+
+    view.addEventListener(
+        itowns.GLOBE_VIEW_EVENTS.GLOBE_INITIALIZED,
+        function(_) {
+            const layersExtent = selectSource.extent.clone();
+        }
+    );
+
+    // TODO: Add Polygon as Object3D
+    //const selection = new itowns.Feature('polygon');
+}
+
+export default {
+    main
+}

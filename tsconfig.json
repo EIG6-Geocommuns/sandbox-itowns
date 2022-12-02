@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "outDir": "./public/libs/",
+    "moduleResolution": "node",
+    "target": "es6",
+    "strict": true,
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
+    /* Testing */
+    "baseUrl": "./",
+    "skipLibCheck": true,
+    "paths": {
+        "itowns/widgets": ["node_modules/itowns/types/Utils/gui/Main.d.ts"],
+        "three": ["node_modules/@types/three/index.d.ts"]
+    }
+  }
+}

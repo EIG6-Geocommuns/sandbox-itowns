@@ -2,15 +2,25 @@ const path = require("path");
 
 let config = {
     entry: {
-        bundle: [
-            './src/index.js',
-        ]
+        bundle: [ './src/index.ts' ],
+    },
+    module: {
+        rules : [
+            {
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/,
+            }
+        ],
+    },
+    resolve: {
+        extensions: ['.tsx', '.ts', '.js'],
     },
     devtool: 'source-map',
     output: {
-        path: path.resolve(__dirname, './public/libs'),
         filename: '[name].js',
-        library: '[name]',
+        path: path.resolve(__dirname, './public/libs'),
+        library: '[name]'
     },
     devServer: {
         devMiddleware: {
@@ -27,11 +37,6 @@ let config = {
         hot: false,
         // historyApiFallback: true,
         // open: true,
-    },
-    resolve: {
-        fallback: {
-            "buffer": require.resolve("buffer")
-        }
     }
 }
 

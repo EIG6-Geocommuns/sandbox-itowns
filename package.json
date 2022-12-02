@@ -1,7 +1,7 @@
 {
-  "name": "itowns-template",
+  "name": "itowns-sandbox",
   "version": "0.1.0",
-  "description": "",
+  "description": "Testing things with itowns + potree",
   "main": "index.js",
   "scripts": {
     "start": "webpack serve --env=development",
@@ -11,12 +11,28 @@
   "author": "",
   "license": "",
   "devDependencies": {
+    "@types/d3": "^7.4.0",
+    "@types/dat.gui": "^0.7.7",
+    "@types/proj4": "^2.5.2",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.9",
+    "@types/three": "^0.146.0",
     "buffer": "^6.0.3",
+    "ts-loader": "^9.4.1",
+    "typescript": "^4.8.4",
     "webpack": "^5.65.0",
     "webpack-cli": "^4.9.1",
     "webpack-dev-server": "^4.7.2"
   },
   "dependencies": {
-    "itowns": "^2.38.2"
+    "d3": "^7.6.1",
+    "dat.gui": "^0.7.9",
+    "itowns": "../itowns",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "peerDependencies": {
+    "proj4": "^2.8.0",
+    "three": "0.140.2"
   }
 }

@@ -1,6 +1,21 @@
 html { height: 100%; }
 body { margin: 0; overflow: hidden; height: 100%; }
 
-#viewerDiv { margin: auto; height: 100%; width: 100%; padding: 0; }
+#root { margin: auto; height: 100%; width: 100%; padding: 0; }
+#viewerDiv {
+    height: 100%;
+    width: 60%;
+    position: relative;
+    overflow: hidden;
+    float: left;
+}
+#sideForm {
+    position: absolute;
+    right: 0;
+    height: 100%;
+    width: 40%;
+    float: left;
+    overflow-y: scroll;
+}
 
 canvas { display: block }
